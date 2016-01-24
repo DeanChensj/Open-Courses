@@ -150,7 +150,6 @@ public class Homework3 {
     TestHelper.verify(result.equals("[  ]"),
                       "BAD SQUISH!!!  No biscuit.");
 
-
     System.out.println("\nLet's twin linked lists!\n");
 
     System.out.println("twinning " + list6.toString() + ":");
