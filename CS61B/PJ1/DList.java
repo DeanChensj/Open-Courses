@@ -19,17 +19,17 @@ public class DList {
 
   /* DList invariants:
    *  1)  head != null.
-   *  2)  For any DListNode2 x in a DList, x.next != null.
-   *  3)  For any DListNode2 x in a DList, x.prev != null.
-   *  4)  For any DListNode2 x in a DList, if x.next == y, then y.prev == x.
-   *  5)  For any DListNode2 x in a DList, if x.prev == y, then y.next == x.
+   *  2)  For any DListNode x in a DList, x.next != null.
+   *  3)  For any DListNode x in a DList, x.prev != null.
+   *  4)  For any DListNode x in a DList, if x.next == y, then y.prev == x.
+   *  5)  For any DListNode x in a DList, if x.prev == y, then y.next == x.
    *  6)  size is the number of DListNodes, NOT COUNTING the sentinel
    *      (denoted by "head"), that can be accessed from the sentinel by
    *      a sequence of "next" references.
    */
 
   /**
-   *  DList() constructor for an empty DList2.
+   *  DList() constructor for an empty DList.
    */
   public DList() {
     head = new DListNode();
@@ -64,6 +64,22 @@ public class DList {
     size++;
   }
 
+  public void insertAfter(DListNode node, short r, short g, short b, int l){
+    DListNode tmpNode = new DListNode(r, g, b, l);
+    tmpNode.next = node.next;
+    tmpNode.prev = node;
+    tmpNode.next.prev = tmpNode;
+    node.next = tmpNode;
+    size++;
+  }
+
+  public void removeAfter(DListNode node){
+    if(node.next == head) return;
+    node.next = node.next.next;
+    node.next.prev = node;
+    size--;
+  }
+
    /**
    *  toString() returns a String representation of this DList.
    *
@@ -72,7 +88,7 @@ public class DList {
    *  @return a String representation of this DList.
    */
   public String toString() {
-    String result = "[  ";
+    String result = "[ ";
     DListNode current = head.next;
     while (current != head) {
       result = result + " ( ";
@@ -80,7 +96,7 @@ public class DList {
       result = result + current.green + "  ";
       result = result + current.blue + "  ";
       result = result + current.runLength + "  ";
-      result = result + " ) ";
+      result = result + ") ";
       current = current.next;
     }
     return result + "]";

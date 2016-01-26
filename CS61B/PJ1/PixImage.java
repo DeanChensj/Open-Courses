@@ -127,18 +127,18 @@ public class PixImage {
    */
   public String toString() {
     // Replace the following line with your solution.
-    System.out.println("[");
+    String out = "[";
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
         for (int i = 0; i < 3; i++) {
-          System.out.print(image[y][x][i] + " ");
+          out = out + image[y][x][i] + " ";
         }
-        System.out.print("\t");
+        out = out + "\t";
       }
-      System.out.println("");
+      out = out + "\n";
     }
-    System.out.println("]");
-    return "";
+    out = out + "]\n";
+    return out;
   }
 
   /**

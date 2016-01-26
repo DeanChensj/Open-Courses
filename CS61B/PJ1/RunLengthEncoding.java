@@ -266,6 +266,41 @@ public class RunLengthEncoding implements Iterable {
   public void setPixel(int x, int y, short red, short green, short blue) {
     // Your solution here, but you should probably leave the following line
     //   at the end.
+    int position = y * width + x + 1, path = 0;
+    DListNode mover = myList.head.next;
+    while(mover != myList.head){
+      path += mover.runLength;
+      if((path - mover.runLength) <= position && path >= position)
+        break;
+      mover = mover.next;
+    }
+
+    if(path == position){
+      myList.insertAfter(mover, red, green, blue, 1);
+      if(--mover.runLength == 0)
+        myList.removeAfter(mover.prev);
+
+    }else{
+      myList.insertAfter(mover, red, green, blue, 1);
+ 
+      if((path - position) != 0){
+        myList.insertAfter(mover.next, mover.red, mover.green, 
+        mover.blue, path - position);
+      }
+      if((mover.runLength -= (path - position + 1)) == 0)
+        myList.removeAfter(mover.prev);
+    }
+
+    for(int i = 0; i < 2; i++){
+      DListNode tmpNode = myList.head.next;
+      while(tmpNode != myList.head){
+        if(tmpNode.equals(tmpNode.next)){
+          tmpNode.runLength += tmpNode.next.runLength;
+          myList.removeAfter(tmpNode);
+        }
+        tmpNode = tmpNode.next;
+      }
+    }
     check();
   }
 
@@ -355,10 +390,9 @@ public class RunLengthEncoding implements Iterable {
     System.out.println("Testing toPixImage() on a 3x3 encoding.");
     doTest(image1.equals(rle1.toPixImage()),
            "image1 -> RLE1 -> image does not reconstruct the original image");
-    System.out.println(rle1);
-    System.out.print(rle1.toPixImage());
+    // System.out.println(rle1);
+    // System.out.print(rle1.toPixImage());
 
-    if(false){
     System.out.println("Testing setPixel() on a 3x3 encoding.");
     setAndCheckRLE(rle1, 0, 0, 42);
     image1.setPixel(0, 0, (short) 42, (short) 42, (short) 42);
@@ -405,8 +439,6 @@ public class RunLengthEncoding implements Iterable {
     image1.setPixel(1, 2, (short) 42, (short) 42, (short) 42);
     doTest(rle1.toPixImage().equals(image1),
            "Setting RLE1[1][2] = 42 fails.");
-    }
-
 
     PixImage image2 = array2PixImage(new int[][] { { 2, 3, 5 },
                                                    { 2, 4, 5 },
@@ -425,10 +457,6 @@ public class RunLengthEncoding implements Iterable {
     doTest(rle2.toPixImage().equals(image2),
            "image2 -> RLE2 -> image does not reconstruct the original image");
 
-    System.out.println(rle2);
-    System.out.print(rle2.toPixImage());
-
-    if(false){
     System.out.println("Testing setPixel() on a 3x3 encoding.");
     setAndCheckRLE(rle2, 0, 1, 2);
     image2.setPixel(0, 1, (short) 2, (short) 2, (short) 2);
@@ -440,7 +468,6 @@ public class RunLengthEncoding implements Iterable {
     image2.setPixel(2, 0, (short) 2, (short) 2, (short) 2);
     doTest(rle2.toPixImage().equals(image2),
            "Setting RLE2[2][0] = 2 fails.");
-
 
     PixImage image3 = array2PixImage(new int[][] { { 0, 5 },
                                                    { 1, 6 },
@@ -514,6 +541,5 @@ public class RunLengthEncoding implements Iterable {
     image4.setPixel(1, 0, (short) 1, (short) 1, (short) 1);
     doTest(rle4.toPixImage().equals(image4),
            "Setting RLE4[1][0] = 1 fails.");
-  }
   }
 }

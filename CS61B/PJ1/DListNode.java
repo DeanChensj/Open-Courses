@@ -1,7 +1,7 @@
-/* DListNode2.java */
+/* DListNode.java */
 
 /**
- *  A DListNode2 is a node in a DList2 (doubly-linked list).
+ *  A DListNode is a node in a DList (doubly-linked list).
  */
 
 public class DListNode {
@@ -24,9 +24,9 @@ public class DListNode {
    *  DListNode() constructor.
    */
   DListNode() {
-    red = 0;
-    green = 0;
-    blue = 0;
+    red = -1;
+    green = -1;
+    blue = -1;
     runLength = 0;
     prev = null;
     next = null;
@@ -48,6 +48,16 @@ public class DListNode {
     runLength = l;
     prev = null;
     next = null;
+  }
+
+  public boolean equals(Object other){
+    if (!(other instanceof DListNode)) {           // Reject non-SLists.
+        return false;
+      }
+
+    DListNode o = (DListNode) other;
+  
+    return (o.red == red && o.green == green && o.blue == blue);      
   }
 
 }

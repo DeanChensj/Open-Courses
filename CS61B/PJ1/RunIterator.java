@@ -37,8 +37,8 @@ public class RunIterator implements Iterator {
    *  These variables MUST be private.
    */
 
-  DListNode node;
-  DListNode head;
+  private DListNode node;
+  private DListNode head;
 
 
   /**
