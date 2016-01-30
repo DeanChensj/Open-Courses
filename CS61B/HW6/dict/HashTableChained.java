@@ -2,6 +2,9 @@
 
 package dict;
 
+import list.*;
+import java.util.Random;
+
 /**
  *  HashTableChained implements a Dictionary as a hash table with chaining.
  *  All objects used as keys must have a valid hashCode() method, which is
@@ -19,7 +22,11 @@ public class HashTableChained implements Dictionary {
   /**
    *  Place any data fields here.
    **/
-
+  protected final int INIT_BUCKETS = 103;
+  protected final int PRIME = 109345121;
+  protected int entries, capacity;
+  protected List hashTable[];
+  protected long scale, shift;
 
 
   /** 
@@ -27,9 +34,18 @@ public class HashTableChained implements Dictionary {
    *  entries.  (The precise number of buckets is up to you, but we recommend
    *  you use a prime number, and shoot for a load factor between 0.5 and 1.)
    **/
-
+  // @SuppressWarnings("unchecked")
   public HashTableChained(int sizeEstimate) {
     // Your solution here.
+    entries = 0;
+    capacity = findPrime(sizeEstimate);
+    hashTable = new SList[capacity];
+    for(int i = 0; i < capacity; i++)
+      hashTable[i] = new SList();
+
+    Random rand = new Random();
+    scale = rand.nextInt(PRIME-1) + 1;
+    shift = rand.nextInt(PRIME);
   }
 
   /** 
@@ -39,6 +55,15 @@ public class HashTableChained implements Dictionary {
 
   public HashTableChained() {
     // Your solution here.
+    entries = 0;
+    capacity = INIT_BUCKETS;
+    hashTable = new SList[capacity];
+    for(int i = 0; i < capacity; i++)
+      hashTable[i] = new SList();
+
+    Random rand = new Random();
+    scale = rand.nextInt(PRIME-1) + 1;
+    shift = rand.nextInt(PRIME);
   }
 
   /**
@@ -51,7 +76,7 @@ public class HashTableChained implements Dictionary {
 
   int compFunction(int code) {
     // Replace the following line with your solution.
-    return 88;
+    return (int)(Math.abs(scale * code + shift) % PRIME) % capacity;
   }
 
   /** 
@@ -63,7 +88,7 @@ public class HashTableChained implements Dictionary {
 
   public int size() {
     // Replace the following line with your solution.
-    return 0;
+    return entries;
   }
 
   /** 
@@ -74,7 +99,7 @@ public class HashTableChained implements Dictionary {
 
   public boolean isEmpty() {
     // Replace the following line with your solution.
-    return true;
+    return entries == 0;
   }
 
   /**
@@ -92,7 +117,17 @@ public class HashTableChained implements Dictionary {
 
   public Entry insert(Object key, Object value) {
     // Replace the following line with your solution.
-    return null;
+    int index = compFunction(key.hashCode());
+
+    Entry entry = new Entry();
+    entry.key = key;
+    entry.value = value;
+
+    hashTable[index].insertBack(entry);
+    if(++entries >= capacity){
+      rehash();
+    }
+    return entry;
   }
 
   /** 
@@ -107,8 +142,31 @@ public class HashTableChained implements Dictionary {
    *          no entry contains the specified key.
    **/
 
-  public Entry find(Object key) {
+  public Entry find(Object key){
     // Replace the following line with your solution.
+    int index = compFunction(key.hashCode());
+
+    int length = hashTable[index].length();
+    if(length == 0) return null;
+    else{
+      ListNode node = findNode(index, key);
+
+      if(node == null) return null;
+      return (Entry) node.item();
+    }
+  }
+
+  private ListNode findNode(int index, Object key) {
+    ListNode node = hashTable[index].front();
+    int length = hashTable[index].length();
+
+    while( node.isValidNode() ){
+      Entry entry = (Entry) node.item();
+      if(entry.key().equals(key)){
+        return node;
+      }
+      node = node.next();
+    }
     return null;
   }
 
@@ -125,9 +183,23 @@ public class HashTableChained implements Dictionary {
    *          no entry contains the specified key.
    */
 
-  public Entry remove(Object key) {
+  public Entry remove(Object key){
     // Replace the following line with your solution.
-    return null;
+    int index = compFunction(key.hashCode());
+
+    int length = hashTable[index].length();
+    if(length == 0) return null;
+    else{
+      ListNode node = findNode(index, key);
+
+      if(node != null){
+        entries--;
+        Entry entry = (Entry) node.item();
+        node.remove();
+        return entry;
+      } 
+      return null;
+    }
   }
 
   /**
@@ -135,6 +207,119 @@ public class HashTableChained implements Dictionary {
    */
   public void makeEmpty() {
     // Your solution here.
+    for(int i = 0; i < capacity; i++){
+      hashTable[i] = new SList();
+    }
+    entries = 0;
+  }
+
+  /**
+   *  Doubles the size of the hash table and rehashes all the entries.
+   */
+  private void rehash() throws InvalidNodeException{
+    capacity *= 2;
+
+    List old[] = hashTable;
+    hashTable = new SList[capacity];
+    for(int i = 0; i < capacity; i++)
+      hashTable[i] = new SList();
+
+    Random rand = new Random();
+    scale = rand.nextInt(PRIME-1) + 1;
+    shift = rand.nextInt(PRIME);
+
+    for (int i = 0; i < capacity/2; i++) {
+      int length = old[i].length();
+      if(length == 0) continue;
+
+      ListNode node = old[i].front();
+      while(node.isValidNode()){
+        Entry entry = (Entry) node.item();
+        int index = compFunction(entry.key().hashCode());
+        hashTable[index].insertBack(entry);
+
+        node = node.next();
+      }
+    }
+  }
+
+  public int findPrime(int size){
+    size *= 2;
+    boolean notPrime[] = new boolean[size+1];
+    for(int i = 2; i*i <= size; i++){
+      if(!notPrime[i]){
+        for(int j = 2*i; j <= size; j += i){
+          notPrime[j] = true;
+        }
+      }
+    }
+    int i;
+    for(i = size; i > 1; i--){
+      if(!notPrime[i]) break;
+    }
+    return i;
+  }
+
+  public String toString(){
+    String out = "";
+    for(int i = 0; i < capacity; i++){
+      out = out + "[" + hashTable[i].length() + "]";
+      if(i % 16 == 0) out = out + "\n";
+    }
+    return out;
+  }
+
+  public void getCollision(){
+    System.out.println("The number of buckets is " + capacity);
+    System.out.println("The number of entries is " + entries);
+    System.out.println("The loading factor is " + (double) entries/capacity);
+
+    double expect = entries - capacity + capacity * Math.pow(1-(1/(double)capacity), entries);
+    System.out.println("The expect collision is : " + expect);
+
+    int collision = 0;
+    for(int i = 0; i < capacity; i++){
+      if(hashTable[i].length() > 1)
+        collision += hashTable[i].length() - 1;
+    }
+    System.out.println("The actual collision is : " + collision);
+  }
+
+  public static void main(String[] args) {
+    int[] testValues = {0,1,64, 1200};
+    for (int num : testValues) {
+      HashTableChained t;
+      if (num == 0) {
+        t = new HashTableChained();
+      }
+      else {
+       t = new HashTableChained(num);
+      }
+      System.out.println("num = " + num + " capacity = " + t.capacity);
+      Entry a = t.insert("hi", 4);
+      System.out.println(t.size()); // 1
+      System.out.println(t.find("hi").value()); // 4
+      t.insert("hi", "gah");
+      System.out.println(t.size()); // 2
+      System.out.println(t.find("hi").value()); // 4
+      t.insert("blue", "sky");
+      System.out.println(t.size()); // 3
+      System.out.println(t.find("blue").value()); // sky
+      a = t.remove("hi");
+      System.out.println(t.size()); // 2
+      System.out.println(a.value()); //4
+      a = t.remove("hi");
+      System.out.println(t.size()); // 1
+      System.out.println(a.value()); //gah
+      System.out.println(t.find("hi")); // null
+      t.insert(2, "well");
+      System.out.println(t.find(2).value()); // well
+      t.makeEmpty();
+      System.out.println(t.find(2)); // null
+      System.out.println(t.remove(2)); // null
+      System.out.println(t.size()); // 0
+    }
+        
   }
 
 }
