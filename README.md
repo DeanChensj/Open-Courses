@@ -1,4 +1,6 @@
 
-##CS61B : Data Structure @ UC Berkeley 
+##CS61B : Data Structure @ UC Berkeley
+ 
+##Coursera: Machine Learning @ Stanford
 
-##### Homeworks  & Projects for 2014Fall
+##### Homeworks  & Projects 
